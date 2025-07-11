@@ -10,14 +10,10 @@ from dotenv import load_dotenv, find_dotenv
 import os
 
 # DEBUG: show where Python thinks it’s loading from
-print("▶️  CWD:", os.getcwd())
-dotenv_path = find_dotenv()
-print("▶️  find_dotenv() ➔", repr(dotenv_path))
-
-# now actually load
-load_dotenv(dotenv_path)
-
-print("▶️  DATABASE_URL after load:", os.getenv("DATABASE_URL"))
+# In Azure App Service, set DATABASE_URL in Configuration → Application settings
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL env var is not set")
 
 # 3. grab the URL
 DATABASE_URL = os.getenv("DATABASE_URL")
