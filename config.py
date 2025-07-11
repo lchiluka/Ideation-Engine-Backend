@@ -15,12 +15,17 @@ import os
 # 🔐  Endpoints & API keys (read from env)  =================================
 # ===========================================================================
 
-AZURE_ENDPOINT = "https://harsh-m6qoycs6-eastus2.cognitiveservices.azure.com"
-AZURE_OPENAI_KEY = "DjlhGHwAzeElpQGkUTYRSlZ1s7R3mlxyviIUQODK8kGcxzmrmiryJQQJ99BBACHYHv6XJ3w3AAAAACOGIyMt"
-SERP_API_KEY     = "82b297d44d1eb327484841f4494b73221eecee8ac1916c42a2ebcffe2243f45b"
-# Endpoint & key for the product-datasheet deployment (GPT‑4o)
-PRODUCTS_ENDPOINT = "https://ccm-product-agent.openai.azure.com"
-PRODUCTS_OPENAI_KEY = "2Gq04Cva1b41axfHcPMCWPaws9OJw3zk3iHRcrrZ9IFsQFVKvSegJQQJ99BDACYeBjFXJ3w3AAABACOG9c66"
+def _get(key: str) -> str:
+    val = os.getenv(key)
+    if not val:
+        raise RuntimeError(f"Missing required environment variable: {key}")
+    return val
+
+AZURE_ENDPOINT       = _get("AZURE_ENDPOINT")
+AZURE_OPENAI_KEY     = _get("AZURE_OPENAI_KEY")
+SERP_API_KEY         = _get("SERP_API_KEY")
+PRODUCTS_ENDPOINT    = _get("PRODUCTS_ENDPOINT")
+PRODUCTS_OPENAI_KEY  = _get("PRODUCTS_OPENAI_KEY")
 # Fail fast if critical secrets are missing when imported by the main app.
 if not AZURE_ENDPOINT or not AZURE_OPENAI_KEY:
     import warnings
