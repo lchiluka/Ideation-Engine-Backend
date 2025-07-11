@@ -47,8 +47,8 @@ jobs:
           azcliversion: 2.50.0
           inlineScript: |
             az webapp config appsettings set \
-              --resource-group ${{ secrets.AZURE_RG }} \
-              --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+              --resource-group ideation-engine-ric \
+              --name carlisle-ideation-engine-backend \
               --settings SCM_DO_BUILD_DURING_DEPLOYMENT=false WEBSITE_RUN_FROM_PACKAGE=1
 
       # 7️⃣ Deploy the ZIP to Azure Web App
