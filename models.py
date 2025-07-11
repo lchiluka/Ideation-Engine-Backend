@@ -1,7 +1,7 @@
 # models.py
 
 from sqlalchemy import Column, Integer, String, Text, DateTime, JSON, Boolean, Float, func
-from .db import Base
+from db import Base
 
 class Concept(Base):
     __tablename__ = "concepts"
