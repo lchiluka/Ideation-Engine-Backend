@@ -1,6 +1,6 @@
 # settings.py
-from pydantic import BaseSettings, AnyUrl
-
+from pydantic_settings import BaseSettings    # now comes from a separate package
+from pydantic.networks import AnyUrl          # URL types still in pydantic.networks
 class Settings(BaseSettings):
     DATABASE_URL: AnyUrl
     AZURE_STORAGE_CONNECTION_STRING: str
