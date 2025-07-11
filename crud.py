@@ -3,6 +3,8 @@
 from sqlalchemy.orm import Session
 import models
 
+from embedding import embed_text, cosine_similarity
+import numpy as np
 
 def get_concepts_by_problem(db: Session, problem_statement: str):
     """
@@ -42,8 +44,6 @@ def create_concepts(db: Session, problem_statement: str, new_concepts: list[dict
         created.append(obj)
     return created
 
-from utils.embedding import embed_text, cosine_similarity
-import numpy as np
 
 def get_similar_concepts(db: Session, problem_statement: str, top_k: int = 5):
     """Return concepts whose problem statements are semantically similar."""
