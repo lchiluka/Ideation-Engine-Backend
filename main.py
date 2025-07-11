@@ -6,10 +6,12 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import datetime
 import uuid
+import os
 
-from . import crud, models
-from .db import get_db, engine
-from .storage import get_container_client
+import crud
+import models
+from db import get_db, engine
+from storage import get_container_client
 
 # Initialize database schema
 models.Base.metadata.create_all(bind=engine)
@@ -100,8 +102,7 @@ def get_similar_concepts_endpoint(
 ):
     try:
         results = crud.get_similar_concepts(db, problem_statement, top_k)
-        filtered = [r for r in results if r.get("similarity", 0) > 0.7]
-        return filtered
+        return [r for r in results if r.get("similarity", 0) > 0.7]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -112,17 +113,14 @@ def upload_proposal(
     db: Session = Depends(get_db),
     container = Depends(get_container_client),
 ):
-    # Upload to Azure Blob Storage
     blob_name = f"{concept_id}/{uuid.uuid4()}-{file.filename}"
     try:
         container.upload_blob(name=blob_name, data=file.file, overwrite=True)
     except Exception as e:
         raise HTTPException(500, f"Blob upload failed: {e}")
-    # Construct URL
     blob_client = container.get_blob_client(blob_name)
     url = blob_client.url
 
-    # Persist URL in DB
     updated = crud.update_concept(db, concept_id, {"proposal_url": url})
     if not updated:
         raise HTTPException(404, f"Concept {concept_id} not found")
@@ -137,8 +135,8 @@ def download_proposal(
     concept = crud.get_concept(db, concept_id)
     if not concept or not concept.proposal_url:
         raise HTTPException(404, "Not found or no proposal attached")
+    blob_name = concept.proposal_url.split('/')[-1]
     try:
-        blob_name = concept.proposal_url.split('/')[-1]
         stream = container.download_blob(blob_name)
         return StreamingResponse(stream.chunks(), media_type="application/octet-stream")
     except Exception as e:
