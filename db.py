@@ -1,36 +1,39 @@
+# db.py
+import os
 from sqlalchemy import create_engine
-
-from pathlib import Path
 from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
-import os
-from dotenv import load_dotenv, find_dotenv
+from settings import Settings
 
-from dotenv import load_dotenv, find_dotenv
-import os
+# ─── Load settings ─────────────────────────────────────────────────────────────
+# Pydantic will read .env locally or actual env vars in Azure App Service
+settings = Settings()
 
-# DEBUG: show where Python thinks it’s loading from
-# In Azure App Service, set DATABASE_URL in Configuration → Application settings
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL env var is not set")
+# ─── Build the full DATABASE_URL ───────────────────────────────────────────────
+db_url: str = settings.DATABASE_URL  # type: ignore
+if "sslmode=" not in db_url:
+    # ensure SSL on Azure Postgres
+    sep = "&" if "?" in db_url else "?"
+    db_url = f"{db_url}{sep}sslmode=require"
 
-# 3. grab the URL
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set! Check that .env is in the project root.")
+# ─── Create Engine & Session ───────────────────────────────────────────────────
+# pool_pre_ping helps recover dropped connections
+engine = create_engine(db_url, pool_pre_ping=True)
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
 
-# 4. ensure sslmode
-if "sslmode=" not in DATABASE_URL:
-    DATABASE_URL += "?sslmode=require"
-engine = create_engine(DATABASE_URL, connect_args={"sslmode": "require"})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# ─── Base Model for your ORM classes ────────────────────────────────────────────
 Base = declarative_base()
 
+# ─── FastAPI Dependency ────────────────────────────────────────────────────────
 def get_db():
     """
-    FastAPI dependency that yields a SQLAlchemy session
-    and ensures it’s closed after the request.
+    Yields a SQLAlchemy Session, and ensures closure after each request.
+    Usage in FastAPI routes:
+        def read_items(db: Session = Depends(get_db)):
+            ...
     """
     db = SessionLocal()
     try:
