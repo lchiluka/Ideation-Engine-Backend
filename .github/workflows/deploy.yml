@@ -1,0 +1,46 @@
+name: Build & Deploy to Azure Web App
+
+on:
+  push:
+    branches:
+      - main     # or your deployment branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Check out your code
+      - uses: actions/checkout@v3
+
+      # 2) Set up Python (choose a version you support—e.g. 3.12)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # 3) Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4) (Optional) Run tests
+      #- name: Run tests
+      #  run: pytest
+
+      # 5) Zip up the app folder
+      - name: Archive application
+        run: zip -r app.zip .
+
+      # 6) Deploy to Azure Web App
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: carlisle-ideation-engine-backend             # replace with your Azure Web App name
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: app.zip
+
+      # 7) (Optional) Post-deploy smoke test 
+      #- name: Smoke test
+      #  run: curl -f https://your-app-name.azurewebsites.net/health
