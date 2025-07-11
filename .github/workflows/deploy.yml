@@ -40,17 +40,6 @@ jobs:
           cd package
           zip -r ../app.zip .
 
-      # 6️⃣ Disable remote Oryx builds (so Azure just drops the ZIP)
-      - name: Disable remote build on Azure
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.50.0
-          inlineScript: |
-            az webapp config appsettings set \
-              --resource-group ideation-engine-ric \
-              --name carlisle-ideation-engine-backend \
-              --settings SCM_DO_BUILD_DURING_DEPLOYMENT=false WEBSITE_RUN_FROM_PACKAGE=1
-
       # 7️⃣ Deploy the ZIP to Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
