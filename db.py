@@ -9,7 +9,7 @@ from settings import Settings
 settings = Settings()
 
 # ─── Build the full DATABASE_URL ───────────────────────────────────────────────
-db_url: str = settings.DATABASE_URL  # type: ignore
+db_url = str(settings.DATABASE_URL)   # type: ignore
 if "sslmode=" not in db_url:
     # ensure SSL on Azure Postgres
     sep = "&" if "?" in db_url else "?"
