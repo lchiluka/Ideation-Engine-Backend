@@ -1,7 +1,7 @@
 # crud.py
 
 from sqlalchemy.orm import Session
-from . import models
+import models
 
 
 def get_concepts_by_problem(db: Session, problem_statement: str):
