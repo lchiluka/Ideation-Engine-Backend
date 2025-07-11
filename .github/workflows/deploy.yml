@@ -10,37 +10,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Check out your code
+      # 1️⃣ Check out your code
       - uses: actions/checkout@v3
 
-      # 2) Set up Python (choose a version you support—e.g. 3.12)
+      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
 
-      # 3) Install dependencies
-      - name: Install dependencies
+      # 3️⃣ Install dependencies into package/
+      - name: Install dependencies into package/
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt --target package
 
-      # 4) (Optional) Run tests
-      #- name: Run tests
-      #  run: pytest
+      # 4️⃣ Copy your application code into package/
+      - name: Copy app code into package/
+        run: |
+          cp *.py package/
+          cp -R alembic package/
+          # If you have other subfolders, list them here:
+          # cp -R migrations package/
+          # cp -R your_module package/
 
-      # 5) Zip up the app folder
-      - name: Archive application
-        run: zip -r app.zip .
+      # 5️⃣ Archive package/ as app.zip
+      - name: Archive package as app.zip
+        run: |
+          cd package
+          zip -r ../app.zip .
 
-      # 6) Deploy to Azure Web App
-      - name: Deploy to Azure
+      # 6️⃣ Disable remote Oryx builds (so Azure just drops the ZIP)
+      - name: Disable remote build on Azure
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.50.0
+          inlineScript: |
+            az webapp config appsettings set \
+              --resource-group ${{ secrets.AZURE_RG }} \
+              --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+              --settings SCM_DO_BUILD_DURING_DEPLOYMENT=false WEBSITE_RUN_FROM_PACKAGE=1
+
+      # 7️⃣ Deploy the ZIP to Azure Web App
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: carlisle-ideation-engine-backend             # replace with your Azure Web App name
+          app-name: carlisle-ideation-engine-backend
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: app.zip
 
-      # 7) (Optional) Post-deploy smoke test 
+      # 8️⃣ (Optional) Smoke-test your health endpoint
       #- name: Smoke test
-      #  run: curl -f https://your-app-name.azurewebsites.net/health
+      #  run: curl -f carlisle-ideation-engine-backend.azurewebsites.net/health
