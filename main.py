@@ -56,25 +56,25 @@ async def unhandled_exception_handler(request, exc: Exception):
 
 # Pydantic schemas
 class ConceptBase(BaseModel):
-    agent: Optional[str]
+    agent: Optional[str]= None
     title: str
-    description: Optional[str]
-    novelty_reasoning: Optional[str]
-    feasibility_reasoning: Optional[str]
-    cost_estimate: Optional[str]
+    description: Optional[str]= None
+    novelty_reasoning: Optional[str]= None
+    feasibility_reasoning: Optional[str]= None
+    cost_estimate: Optional[str]= None
     industry: Optional[str] = None
     original_solution: Optional[str] = None
     adaptation_challenges: Optional[str] = None
-    trl: Optional[float]
-    trl_reasoning: Optional[str]
-    trl_citations: Optional[Any]
-    validated_trl: Optional[float]
-    validated_trl_reasoning: Optional[str]
-    validated_trl_citations: Optional[Any]
-    components: Optional[Any]
-    references: Optional[Any]
-    constructive_critique: Optional[str]
-    proposal_url: Optional[str]
+    trl: Optional[float]= None
+    trl_reasoning: Optional[str]= None
+    trl_citations: Optional[Any]= None
+    validated_trl: Optional[float]= None
+    validated_trl_reasoning: Optional[str]= None
+    validated_trl_citations: Optional[Any]= None
+    components: Optional[Any]= None
+    references: Optional[Any]= None
+    constructive_critique: Optional[str]= None
+    proposal_url: Optional[str]= None
 
     class Config:
         orm_mode = True
