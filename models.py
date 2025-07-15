@@ -14,6 +14,9 @@ class Concept(Base):
     novelty_reasoning           = Column(Text,   nullable=True)
     feasibility_reasoning       = Column(Text,   nullable=True)
     cost_estimate               = Column(Text,   nullable=True)    # switched to Text if your DF has formatted strings
+    industry                    = Column(String, nullable=True)
+    original_solution           = Column(Text,   nullable=True)
+    adaptation_challenges       = Column(Text,   nullable=True)
     trl                         = Column(Float,  nullable=True)
     trl_reasoning               = Column(Text,   nullable=True)
     trl_citations               = Column(JSON,   nullable=True)
