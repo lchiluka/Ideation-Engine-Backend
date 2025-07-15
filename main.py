@@ -13,10 +13,61 @@ import models
 from db import get_db, engine
 from storage import get_container_client
 
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi import HTTPException
+import traceback
+import logging
+
 # Initialize database schema
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+logger = logging.getLogger("uvicorn.error")
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    body = await request.body()
+    logger.error("🚨 422 Validation Error:")
+    logger.error(f"→ Details: {exc.errors()}")
+    logger.error(f"→ Payload: {body.decode('utf-8')}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()}
+    )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.error("⚠️ HTTPException:")
+    logger.error(f"→ Status Code: {exc.status_code}")
+    logger.error(f"→ Detail: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
+@app.exception_handler(StarletteHTTPException)
+async def starlette_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    logger.error("⚠️ StarletteHTTPException:")
+    logger.error(f"→ Status Code: {exc.status_code}")
+    logger.error(f"→ Detail: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.error("💥 Unhandled Exception:")
+    logger.error(f"→ Type: {type(exc).__name__}")
+    logger.error(f"→ Error: {str(exc)}")
+    logger.error(f"→ Traceback:\n{traceback.format_exc()}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "error": str(exc)}
+    )
 
 # Pydantic schemas
 class ConceptBase(BaseModel):
