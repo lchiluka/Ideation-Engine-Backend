@@ -113,7 +113,7 @@ def read_concepts(problem_statement: str, db: Session = Depends(get_db)):
 @app.post("/concepts", response_model=List[ConceptRead])
 def create_concepts_endpoint(
     *,
-    workflow: str = Query(..., description="Ideation workflow: 'cross-industry' for cross-industry, else traditional"),
+    workflow: str = Query("traditional", description="Ideation workflow: 'cross-industry' for cross-industry, else traditional"),
     concepts: List[ConceptCreate] = Body(...),
     db: Session = Depends(get_db),
 ):
