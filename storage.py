@@ -2,9 +2,9 @@
 from azure.storage.blob import BlobServiceClient
 from settings import Settings
 from fastapi import HTTPException
-
+import logging
 settings = Settings()
-
+logging.getLogger("uvicorn.error").info(f"Using blob container: {settings.BLOB_CONTAINER}")
 _blob_svc: BlobServiceClient | None = None
 
 def get_blob_service_client() -> BlobServiceClient:

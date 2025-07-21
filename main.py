@@ -158,7 +158,13 @@ def get_similar_concepts_endpoint(problem_statement: str, top_k: int = 50, db: S
 def upload_proposal(concept_id: int, file: UploadFile = File(...), db: Session = Depends(get_db), container = Depends(get_container_client)):
     blob_name = f"{concept_id}/{uuid.uuid4()}-{file.filename}"
     try:
-        container.upload_blob(name=blob_name, data=file.file, overwrite=True)
+        container.upload_blob(
+            name=blob_name,
+            data=file.file,
+            overwrite=True,
+            max_concurrency=4,      # try 4–8 parallel connections
+            timeout=300             # back‑end timeout, seconds
+        )
     except Exception as e:
         raise HTTPException(500, f"Blob upload failed: {e}")
     blob_client = container.get_blob_client(blob_name)
